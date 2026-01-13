@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://8pir0itqkfcr"]
+
+[ext_resource type="Texture2D" uid="uid://drpw6lt8byqsn" path="res://Tiles/Water_Middle.png" id="1_jgrln"]
+[ext_resource type="Script" uid="uid://b0iiukcndkg0n" path="res://ItemData.gd" id="2_7u7ot"]
+
+[resource]
+resource_name = "纯净水"
+script = ExtResource("2_7u7ot")
+item_name = "纯净水"
+type = "Water"
+icon = ExtResource("1_jgrln")
+description = "这是水，使用+30饥渴"
+amount = 1
+value = 30

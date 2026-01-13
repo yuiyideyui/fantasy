@@ -663,11 +663,34 @@ script = ExtResource("5_d21ai")
 [node name="TreeSpawnZone" type="Area2D" parent="NavigationRegion2D"]
 position = Vector2(21, 19)
 
+[node name="treeBodys2" type="StaticBody2D" parent="NavigationRegion2D/TreeSpawnZone" groups=["treeBodys"]]
+z_index = -1
+position = Vector2(178, 231)
+script = ExtResource("5_kdubu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys2"]
+position = Vector2(-1.5, -3)
+shape = SubResource("RectangleShape2D_d21ai")
+
+[node name="Sprite2D" type="Sprite2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys2"]
+texture = ExtResource("5_q6r6c")
+
+[node name="treeBodys3" type="StaticBody2D" parent="NavigationRegion2D/TreeSpawnZone" groups=["treeBodys"]]
+z_index = -1
+position = Vector2(210, 276)
+script = ExtResource("5_kdubu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys3"]
+position = Vector2(-1.5, -3)
+shape = SubResource("RectangleShape2D_d21ai")
+
+[node name="Sprite2D" type="Sprite2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys3"]
+texture = ExtResource("5_q6r6c")
+
 [node name="treeBodys1" type="StaticBody2D" parent="NavigationRegion2D/TreeSpawnZone" groups=["treeBodys"]]
 z_index = -1
 position = Vector2(242, -153)
 script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys1"]
 position = Vector2(-1.5, -3)
@@ -679,47 +702,10 @@ texture = ExtResource("5_q6r6c")
 [node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys1"]
 vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone"]
-position = Vector2(145.5, 148)
-shape = SubResource("RectangleShape2D_rj586")
-
-[node name="treeBodys2" type="StaticBody2D" parent="NavigationRegion2D/TreeSpawnZone" groups=["treeBodys"]]
-z_index = -1
-position = Vector2(98, 224)
-script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys2"]
-position = Vector2(-1.5, -3)
-shape = SubResource("RectangleShape2D_d21ai")
-
-[node name="Sprite2D" type="Sprite2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys2"]
-texture = ExtResource("5_q6r6c")
-
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys2"]
-vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
-
-[node name="treeBodys3" type="StaticBody2D" parent="NavigationRegion2D/TreeSpawnZone" groups=["treeBodys"]]
-z_index = -1
-position = Vector2(151, 184)
-script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys3"]
-position = Vector2(-1.5, -3)
-shape = SubResource("RectangleShape2D_d21ai")
-
-[node name="Sprite2D" type="Sprite2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys3"]
-texture = ExtResource("5_q6r6c")
-
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys3"]
-vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
-
 [node name="treeBodys4" type="StaticBody2D" parent="NavigationRegion2D/TreeSpawnZone" groups=["treeBodys"]]
 z_index = -1
-position = Vector2(109, 82)
+position = Vector2(246, 322)
 script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys4"]
 position = Vector2(-1.5, -3)
@@ -728,8 +714,9 @@ shape = SubResource("RectangleShape2D_d21ai")
 [node name="Sprite2D" type="Sprite2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys4"]
 texture = ExtResource("5_q6r6c")
 
-[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys4"]
-vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone"]
+position = Vector2(145.5, 148)
+shape = SubResource("RectangleShape2D_rj586")
 
 [node name="fence" type="Node2D" parent="NavigationRegion2D"]
 

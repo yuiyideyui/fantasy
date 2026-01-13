@@ -1,0 +1,69 @@
+[gd_scene load_steps=9 format=3 uid="uid://ojxltjdn0mjp"]
+
+[ext_resource type="Script" uid="uid://bkxvbn84w08vn" path="res://crop.gd" id="1_htbnt"]
+[ext_resource type="Texture2D" uid="uid://cujehsbqmbvft" path="res://Outdoor decoration/Outdoor_Decor_Free.png" id="2_ybkda"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ns8q2"]
+atlas = ExtResource("2_ybkda")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qxnh8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ns8q2")
+}],
+"loop": false,
+"name": &"default",
+"speed": 1.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vl0i0"]
+atlas = ExtResource("2_ybkda")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ltqg1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vl0i0")
+}],
+"loop": false,
+"name": &"default",
+"speed": 1.0
+}]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5jjib"]
+atlas = ExtResource("2_ybkda")
+region = Rect2(64, 32, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_v4ouc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5jjib")
+}],
+"loop": false,
+"name": &"default",
+"speed": 1.0
+}]
+
+[node name="crop" type="Node2D"]
+z_index = 1
+script = ExtResource("1_htbnt")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_qxnh8")
+
+[node name="AnimatedSprite2D2" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ltqg1")
+
+[node name="AnimatedSprite2D3" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_v4ouc")
+
+[node name="AnimatedSprite2D4" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_v4ouc")
+
+[node name="Timer" type="Timer" parent="."]
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

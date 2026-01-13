@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://cjypjxjcb5u3n"]
+
+[ext_resource type="Texture2D" uid="uid://bqo7ud08xa7jc" path="res://Outdoor decoration/bread.png" id="1_a4gd0"]
+[ext_resource type="Script" uid="uid://b0iiukcndkg0n" path="res://ItemData.gd" id="2_wqncf"]
+
+[resource]
+resource_name = "食物"
+script = ExtResource("2_wqncf")
+item_name = "食物"
+icon = ExtResource("1_a4gd0")
+description = "这是食物，使用+30饥饿"
+amount = 1
+value = 30

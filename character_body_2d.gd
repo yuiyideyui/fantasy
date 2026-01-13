@@ -1,21 +1,23 @@
 extends CharacterBody2D
 
 const SPEED = 300.0
-
+@onready var product_instance = $"../../product"
 @onready var playerAnimate = $AnimatedSprite2D
 @onready var ray = $RayCast2D 
-@onready var water_layer: TileMapLayer = $"../../WaterLayer"
+@onready var water_layer: TileMapLayer = $"../../map/WaterLayer"
 @onready var attack_area: Area2D = $AttackArea
 @onready var tree_template = $"../../NavigationRegion2D/TreeSpawnZone/treeBodys1"
 @onready var spawn_zone_shape = $"../../NavigationRegion2D/TreeSpawnZone/CollisionShape2D"
 @onready var nav_region: NavigationRegion2D = $"../../NavigationRegion2D"
 # 在主角色脚本中
-@onready var stats = $"../.."
+@onready var stats = $"../../stats"
 # 1. 引用所有 UI 节点
 @onready var health_bar:ProgressBar = $"../../health"  # 路径请以你拖拽生成的为准$
 @onready var hunger_bar:ProgressBar = $"../../hunger"
 @onready var thirst_bar:ProgressBar = $"../../thirst"
 @onready var sanity_bar:ProgressBar = $"../../sanity"
+@onready var equipment = $"../../equipment"
+@onready var farmland: TileMapLayer = $"../../map/Farmland" # 引用你的耕地层
 enum State { IDLE, MOVE, SURF, ATTACK, AUTO_MOVE }
 var current_state = State.IDLE
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D # 2. 获取导航节点
@@ -136,7 +138,72 @@ func _input(event: InputEvent) -> void:
 	
 	if event.is_action_pressed("att") and not event.is_echo():
 		play_att_animation()
+	# 假设玩家按下鼠标左键，且手里拿着锄头
+	if event.is_action_pressed("interact"):
+		perform_interaction()
+		
+func perform_interaction():
+	var foot_pos = global_position + Vector2(0, 5)
+	var map_pos = farmland.local_to_map(farmland.to_local(foot_pos))
+	var tile_data = farmland.get_cell_tile_data(map_pos)
 
+	if not tile_data:
+		print("这里什么都没有")
+		return
+
+	# 模式匹配：一个按键，多种用途
+	if tile_data.get_custom_data("is_water"):
+		get_water()
+	elif tile_data.get_custom_data("is_farmland"):
+		plant_at_player_position(map_pos)
+		
+func get_water():
+	# 播放取水动画
+	product_instance.addProduct(product_instance.ItemType.纯净水)
+	print("装满了水壶")
+func plant_at_player_position(map_pos):
+	# 检查是否已经种了东西（复用之前的检测函数）
+	var is_farmland = get_plant_at_pos(map_pos)
+	if not is_instance_valid(is_farmland):
+		spawn_crop(map_pos)
+		print("种植成功！")
+	else:
+		if is_farmland.is_get_is:
+			print("植物成熟了")
+			do_harvest(is_farmland)
+		else:
+			print("植物还没熟呢，不能收！")
+# 辅助函数：通过坐标检查该位置是否已经有植物了
+func get_plant_at_pos(map_pos: Vector2i):
+	# 获取所有属于 "crop_instances" 组的节点
+	for crop in get_tree().get_nodes_in_group("crop_instances"):
+		# 检查这个植物身上存的地图坐标是否等于我们当前检测的坐标
+		if crop.has_meta("map_pos") and crop.get_meta("map_pos") == map_pos:
+			return crop
+	return null
+# 收割逻辑
+func do_harvest(plant):
+	product_instance.addProduct(product_instance.ItemType.食物)
+	# 这里可以给玩家加金币或物品
+	plant.queue_free() # 移除植物
+func spawn_crop(map_pos: Vector2i):
+	var crop_scene = preload("res://Wheat.tscn")
+	var crop = crop_scene.instantiate()
+	
+	# 1. 直接加到 farmland 下，这样 crop 的 position 就是相对于地图格子的了
+	farmland.add_child(crop)
+	
+	# 2. 使用 map_to_local，它会返回该格子在 TileMap 内部的中心点位置
+	crop.position = farmland.map_to_local(map_pos)
+	
+	# 3. 强制提高 Z 索引，防止被地块遮挡
+	crop.z_index = 5 
+	
+	# 4. 打标签和元数据
+	crop.add_to_group("crop_instances")
+	crop.set_meta("map_pos", map_pos)
+	
+	print("植物已生成在格子坐标：", map_pos, " 相对位置：", crop.position)
 func try_surf():
 	ray.force_raycast_update()
 	if current_state != State.SURF:
@@ -186,12 +253,12 @@ func play_att_animation() -> void:
 	await get_tree().physics_frame
 	
 	var bodies = attack_area.get_overlapping_bodies()
-	print("检测到物体数量: ", bodies.size())
+	print("检测到物体数量: ", bodies.size(),equipment.get_total_stats().attack)
 	
 	for body in bodies:
 		# 建议给树节点加一个 cut 方法，或者保持你的 group 判断
 		if body.has_method("cut"):
-			body.cut() # 调用我们之前写的带血量和动画的函数
+			body.cut(equipment.get_total_stats().attack) # 调用我们之前写的带血量和动画的函数
 			attack_area.monitoring = true
 			break 
 

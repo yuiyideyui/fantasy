@@ -1,15 +1,14 @@
 extends StaticBody2D
 
-@export var max_health: int = 3
+@export var max_health: int = 130
 var current_health: int = max_health
 
 @onready var navigation_region = $"../.."
 @onready var sprite = $Sprite2D # 确保你的树有 Sprite2D 节点
-
-func cut():
+func cut(attack):
 	# 减少生命值
-	current_health -= 1
-	
+	current_health -= attack
+	print('树剩余血量',current_health)
 	if current_health <= 0:
 		die()
 	else:
