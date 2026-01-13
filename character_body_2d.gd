@@ -13,13 +13,15 @@ const SPEED = 300.0
 @onready var stats = $"../../stats"
 # 1. 引用所有 UI 节点
 @onready var health_bar:ProgressBar = $"../../health"  # 路径请以你拖拽生成的为准$
-@onready var hunger_bar:ProgressBar = $"../../hunger"
-@onready var thirst_bar:ProgressBar = $"../../thirst"
+@onready var nutrition_bar:ProgressBar = $"../../nutrition"
+@onready var hydration_bar:ProgressBar = $"../../hydration"
 @onready var sanity_bar:ProgressBar = $"../../sanity"
 @onready var equipment = $"../../equipment"
 @onready var farmland: TileMapLayer = $"../../map/Farmland" # 引用你的耕地层
+
 enum State { IDLE, MOVE, SURF, ATTACK, AUTO_MOVE }
 var current_state = State.IDLE
+signal navigation_finished
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D # 2. 获取导航节点
 var last_direction = "D"
 var can_check_land = false 
@@ -41,10 +43,10 @@ func _ready() -> void:
 
 func _process(_delta):
 	# 检查 stats 和 UI 节点是否都存在，防止 null 报错
-	if stats and health_bar and hunger_bar and thirst_bar and sanity_bar:
+	if stats and health_bar and nutrition_bar and hydration_bar and sanity_bar:
 		health_bar.value = stats.health
-		hunger_bar.value = stats.hunger
-		thirst_bar.value = stats.thirst
+		nutrition_bar.value = stats.nutrition
+		hydration_bar.value = stats.hydration
 		sanity_bar.value = stats.sanity
 	else:
 		# 打印调试信息，看看到底是谁丢了
@@ -65,28 +67,67 @@ func _physics_process(_delta: float) -> void:
 			velocity = velocity.move_toward(Vector2.ZERO, SPEED)
 		State.AUTO_MOVE: # 4. 处理自动导航逻辑
 			handle_auto_move()
-	move_and_slide()
-# --- 新增：触发自动导航的方法 ---
-func start_auto_navigation(target_pos: Vector2):
-	current_state = State.AUTO_MOVE
-	nav_agent.target_position = target_pos
+	
+	# 原有的 return 判断保留，但注意：下面的逻辑只有在 AUTO_MOVE 时才会执行
+	if current_state != State.AUTO_MOVE:
+		return
+	
+	# 如果导航代理认为结束了，我们依然要进一次 _on_reach_destination 以确保信号发出
+	if nav_agent.is_navigation_finished():
+		_on_reach_destination()
+		return
 
-# --- 新增：自动导航移动逻辑 ---
+	# 执行物理移动
+	var next_path_pos = nav_agent.get_next_path_position()
+	var direction = global_position.direction_to(next_path_pos)
+	velocity = direction * 150.0 
+	move_and_slide()
+	
+	# --- 改进的“到达”判定逻辑 ---
+	var dist_to_target = global_position.distance_to(nav_agent.target_position)
+	
+	# 条件 A: 引擎判定触发 | 条件 B: 足够近（解决重叠） | 条件 C: 卡死挤压判定
+	if nav_agent.is_target_reached() or dist_to_target < 10.0:
+		_on_reach_destination()
+	elif velocity.length() < 10.0 and dist_to_target < 20.0:
+		_on_reach_destination()
+
+func _on_reach_destination():
+	# 只有在 AUTO_MOVE 状态下才处理到达逻辑，防止重复触发
+	if current_state == State.AUTO_MOVE:
+		velocity = Vector2.ZERO
+		current_state = State.IDLE
+		nav_agent.target_position = global_position 
+		navigation_finished.emit() 
+		print("到达目的地/目标重叠区域，发送完成信号")
+
+# --- 触发自动导航的方法 ---
+func start_auto_navigation(target_pos: Vector2):
+	var map_rid = get_world_2d().get_navigation_map()
+	var safe_pos = NavigationServer2D.map_get_closest_point(map_rid, target_pos)
+	
+	if safe_pos.distance_to(target_pos) > 32.0:
+		print("警告：目标点被遮挡，已修正至最近的可通行位置")
+
+	current_state = State.AUTO_MOVE
+	nav_agent.target_position = safe_pos
+
+# --- 自动导航移动逻辑 ---
 func handle_auto_move():
-	# 增加一个距离判断：如果离下一个路径点极近，直接视为到达该点
 	var next_path_pos = nav_agent.get_next_path_position()
 	
-	# 如果距离非常近（例如 3 像素），则不需要让避障算法介入，防止反复减速
+	# 如果距离非常近，跳过避障直接让下方 move_and_slide 处理
 	if global_position.distance_to(next_path_pos) < 3.0:
 		return
 
 	var direction = (next_path_pos - global_position).normalized()
 
 	if nav_agent.avoidance_enabled:
-		nav_agent.set_velocity(direction * SPEED)
+		# 如果启用了避障，建议在这里处理信号回调，如果不启用，下方逻辑会处理 velocity
+		nav_agent.set_velocity(direction * 150.0)
 	else:
-		velocity = direction * SPEED
-		update_walk_animation(direction) # 只有不使用避障模式时才在这里 update
+		# 这里只处理动画，不改动 velocity，因为下方统一执行 move_and_slide
+		update_walk_animation(direction)
 # --- 陆地移动 ---
 func handle_ground_move():
 	var direction := Input.get_vector("walkL", "walkR", "walkU", "walkD")

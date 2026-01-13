@@ -9,3 +9,10 @@ class_name ItemData # 这行非常重要，有了它你才能在新建资源时�
 # 声明变量时指定类型（强类型，会有代码补全）
 # 如果是消耗品，可以加这个
 @export var value: int = 10 # 恢复量（比如食物加10饱食度，灯能亮10分钟）
+func to_dict() -> Dictionary:
+	return {
+		"name": item_name,
+		"amount": amount,
+		"type": type,
+		"description":description
+	}

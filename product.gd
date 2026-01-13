@@ -8,7 +8,7 @@ var panel_instance = null # 用来存储实例化后的面板
 @onready var status = $"../stats"
 # 加载你定义好的商品模板
 var Bread_res = load("res://Resource/Bread.tres")
-# 假设你已经按照之前的步骤，在检查器里拖入了商品 Resource
+# 假设你已经按照之前的步骤，在检查器里拖入了商品 Resources
 @export var inventory: Array[ItemData] = []
 
 func _ready():
@@ -71,9 +71,9 @@ func update_ui_text():
 	panel_instance.display_inventory(inventory)
 
 # 模拟使用商品的函数
-func use_item(item_data: ItemData):
+func use_item(item_name: String):
 	# 1. 查找物品在背包中的索引
-	var index = inventory.find_custom(func(e): return e.item_name == item_data.item_name)
+	var index = inventory.find_custom(func(e): return e.item_name == item_name)
 	
 	if index != -1:
 		var item_obj = inventory[index]
@@ -99,4 +99,6 @@ func use_item(item_data: ItemData):
 		update_ui_text()
 		
 	else:
-		print("错误：背包中找不到物品 - ", item_data.item_name)
+		var json_string = JSON.stringify("错误：背包中找不到物品 - ", item_name)
+		NetworkManager.socket.send_text(json_string)
+		print("错误：背包中找不到物品 - ", item_name)

@@ -586,10 +586,10 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="golbal" type="Node2D" groups=["golbal"]]
+[node name="golbal" type="Node2D"]
 script = ExtResource("1_0h7mo")
 
-[node name="product" type="Node2D" parent="." groups=["product"]]
+[node name="product" type="Node2D" parent="."]
 script = ExtResource("2_ta5nu")
 inventory = Array[ExtResource("3_k73cj")]([ExtResource("4_rjqkl"), ExtResource("5_rjqkl")])
 
@@ -603,7 +603,7 @@ script = ExtResource("1_ir8iy")
 position = Vector2(504, 302)
 scale = Vector2(2, 2)
 
-[node name="CharacterBody2D" type="CharacterBody2D" parent="player" groups=["player"]]
+[node name="CharacterBody2D" type="CharacterBody2D" parent="player"]
 z_index = 1
 scale = Vector2(0.7, 0.7)
 collision_mask = 13
@@ -678,7 +678,7 @@ shape = SubResource("RectangleShape2D_rj586")
 z_index = -1
 position = Vector2(98, 224)
 script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍倒这棵树可以获得木材+10"
+metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys2"]
 position = Vector2(-1.5, -3)
@@ -694,7 +694,7 @@ vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
 z_index = -1
 position = Vector2(151, 184)
 script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍倒这棵树可以获得木材+10"
+metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys3"]
 position = Vector2(-1.5, -3)
@@ -710,7 +710,7 @@ vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
 z_index = -1
 position = Vector2(109, 82)
 script = ExtResource("5_kdubu")
-metadata/description = "这是一棵树，砍倒这棵树可以获得木材+10"
+metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/TreeSpawnZone/treeBodys4"]
 position = Vector2(-1.5, -3)
@@ -743,6 +743,22 @@ tile_set = SubResource("TileSet_x0ka3")
 position = Vector2(199, 8)
 tile_map_data = PackedByteArray("AAAkABMAAAAAAAEAAAAkABQAAAAAAAEAAAAkABUAAAAAAAEAAAAkABYAAAAAAAEAAAAkABcAAAABAAMAAAAlABcAAAACAAMAAAAmABcAAAACAAMAAAAnABcAAAACAAMAAAAoABcAAAACAAMAAAApABcAAAACAAMAAAAqABcAAAACAAMAAAArABcAAAACAAMAAAAsABcAAAADAAMAAAAsABYAAAAAAAEAAAAsABUAAAAAAAEAAAAsABQAAAAAAAEAAAAsABMAAAAAAAEAAAAkABIAAAABAAEAAAAsABIAAAADAAEAAAAlABIAAAACAAAAAAAmABIAAAACAAAAAAArABIAAAACAAAAAAAqABIAAAACAAAAAAA=")
 tile_set = SubResource("TileSet_x0ka3")
+
+[node name="treeBodys1" type="StaticBody2D" parent="NavigationRegion2D" groups=["treeBodys"]]
+z_index = -1
+position = Vector2(263, -134)
+script = ExtResource("5_kdubu")
+metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="NavigationRegion2D/treeBodys1"]
+position = Vector2(-1.5, -3)
+shape = SubResource("RectangleShape2D_d21ai")
+
+[node name="Sprite2D" type="Sprite2D" parent="NavigationRegion2D/treeBodys1"]
+texture = ExtResource("5_q6r6c")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="NavigationRegion2D/treeBodys1"]
+vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
 
 [node name="chickenAnimals" type="Node2D" parent="."]
 

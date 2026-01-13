@@ -6,12 +6,14 @@ extends Node2D
 	$NavigationRegion2D/TreeSpawnZone, 
 	$NavigationRegion2D/fence
 ]
-
+@onready var player_status = $stats
+@onready var player = $player/CharacterBody2D
+@onready var product = $product
 func _ready():
 	export_all_to_json()
 
 ## 主导出函数
-func export_all_to_json():
+func export_all_to_json(getOrSend=''):
 	var export_data = {
 		"export_time": Time.get_datetime_string_from_system(),
 		"map_layers": {},
@@ -31,47 +33,88 @@ func export_all_to_json():
 		if root:
 			var root_entities = get_static_entities(root, first_layer)
 			export_data["entities"].append_array(root_entities)
-	
-	save_json_file(export_data, "ai_map_full_data.json")
+	export_data['player_status'] = {
+		"nutrition": player_status.nutrition,
+		"health": player_status.health,
+		"hydration": player_status.health,
+		"sanity": player_status.sanity,  
+		"pos": { "grid_x": player.global_position.x, "grid_y": player.global_position.y },
+		"inventory":{
+			"capacity": 20,
+			"used": 5,
+			"items": product.inventory.map(func(i): return i.to_dict())
+		}
+	}
+	if(getOrSend):
+		NetworkManager.sendData = export_data
+		NetworkManager.send_data(export_data)
+		return
+	save_and_sync_ai(export_data)
 
-# --- 实体提取（支持 Metadata 中的 description） ---
+# --- 实体提取（支持 Metadata 并解析 CollisionShape2D 获取尺寸） ---
 func get_static_entities(root: Node, reference_layer: TileMapLayer) -> Array:
 	var entities = []
 	for child in root.get_children():
 		if child is Node2D:
-			# 优先从脚本变量获取，如果没有，再从 Metadata 获取
+			# 1. 优先从脚本变量获取描述，其次 Metadata
 			var desc = child.get("description")
 			if desc == null and child.has_meta("description"):
 				desc = child.get_meta("description")
 			
+			# 2. 获取尺寸 w 和 h (通过 CollisionShape2D)
+			var size = _get_collision_size(child)
+			
 			var info = {
 				"n": child.name,
 				"pixel_p": {"x": child.global_position.x, "y": child.global_position.y},
-				"grid_p": null,
+				"grid_p": null, # 预留网格坐标
+				"w": size.x,
+				"h": size.y,
 				"r": child.rotation,
 				"description": str(desc) if desc != null else "",
 				"meta": {}
 			}
-			
-			# 坐标转换逻辑...
+
+			# 3. 计算网格坐标 (保留你之前的逻辑)
 			if reference_layer:
 				var g_pos = reference_layer.local_to_map(reference_layer.to_local(child.global_position))
-				info["grid_p"] = {"x": g_pos.x, "y": g_pos.y}
-			
-			# 提取其余 Metadata
+				info["grid_p"] = {"x": int(g_pos.x), "y": int(g_pos.y)}
+
+			# 4. 提取其余 Metadata
 			for m_key in child.get_meta_list():
-				if m_key != "description": # 避免重复提取
+				if m_key != "description":
 					info["meta"][m_key] = _sanitize_value(child.get_meta(m_key))
 				
 			entities.append(info)
 	return entities
-# --- 瓦片压缩（支持 Custom Data 中的 description） ---
 
-func get_rect_compressed_map(layer: TileMapLayer) -> Array:
+# --- 辅助函数：解析碰撞体形状获取尺寸 ---
+func _get_collision_size(entity: Node2D) -> Vector2:
+	for child in entity.get_children():
+		if child is CollisionShape2D and child.shape:
+			var s = child.shape
+			if s is RectangleShape2D:
+				# RectangleShape2D 的 extents 是中心到边的距离，所以要乘以 2
+				return s.size 
+			elif s is CircleShape2D:
+				# 圆形则返回直径
+				return Vector2(s.radius * 2, s.radius * 2)
+			elif s is CapsuleShape2D:
+				return Vector2(s.radius * 2, s.height)
+	
+	# 如果没有碰撞体，返回默认值或 0
+	return Vector2(0, 0)
+# --- 瓦片压缩（支持 Custom Data 中的 description） ---
+func get_rect_compressed_map(layer: TileMapLayer) -> Dictionary:
 	var compressed_areas = []
 	var used_cells = layer.get_used_cells()
 	var visited = {} 
 	used_cells.sort()
+
+	# --- 1. 获取图层全局描述 ---
+	# 这里假设你把描述写在了节点的 Meta 里，或者直接用节点名字
+	# 你也可以改为手动传入一个参数
+	var layer_description = layer.get_meta("description", layer.name)
 
 	var custom_names = []
 	if layer.tile_set:
@@ -88,19 +131,27 @@ func get_rect_compressed_map(layer: TileMapLayer) -> Array:
 			for y in range(rect.position.y, rect.end.y):
 				visited[Vector2i(x, y)] = true
 		
+		# --- 2. 区域数据不再包含 description ---
 		var area = {
-			"x": rect.position.x, "y": rect.position.y, 
-			"w": rect.size.x, "h": rect.size.y,
-			"description": features.get("description", "") # 提取描述
+			"x": rect.position.x,
+			"y": rect.position.y, 
+			"w": rect.size.x,
+			"h": rect.size.y
 		}
 		
-		# 合并其余特征
+		# 合并其余特征 (Custom Data)
 		for f_key in features:
-			if f_key != "description":
-				area[f_key] = features[f_key]
+			# 如果你的 CustomData 里确实没写 description，这里就不用判断
+			area[f_key] = features[f_key]
 				
 		compressed_areas.append(area)
-	return compressed_areas
+
+	# --- 3. 返回包含全局信息的字典 ---
+	return {
+		"layer_name": layer.name,
+		"description": layer_description,
+		"areas": compressed_areas
+	}
 
 func _get_tile_features(layer: TileMapLayer, pos: Vector2i, names: Array) -> Dictionary:
 	var f = {}
@@ -147,6 +198,14 @@ func _sanitize_value(val):
 	if val is Vector2 or val is Vector2i: return {"x": val.x, "y": val.y}
 	return val
 
+func save_and_sync_ai(data: Dictionary):
+	# 1. 保留原本的存盘功能（可选，用于调试）
+	save_json_file(data, "test.json")
+	# 2. 通过 WebSocket 实时推送
+	if NetworkManager.is_connected_to_server:
+		NetworkManager.send_data(data)
+	else:NetworkManager.sendData = data
+		
 func save_json_file(data: Dictionary, file_name: String):
 	var file = FileAccess.open("user://" + file_name, FileAccess.WRITE)
 	if file:

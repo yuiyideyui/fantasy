@@ -15,6 +15,10 @@ run/main_scene="uid://bvk45yospom2n"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[autoload]
+
+NetworkManager="*res://NetworkManager.gd"
+
 [display]
 
 window/stretch/mode="viewport"
@@ -24,6 +28,9 @@ window/stretch/mode="viewport"
 chicken=""
 treeBodys=""
 fenceMap=""
+player=""
+product=""
+golbal=""
 
 [input]
 

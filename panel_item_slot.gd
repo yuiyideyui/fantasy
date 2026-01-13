@@ -4,12 +4,12 @@ extends Panel
 @onready var sprite = $TextureRect
 @onready var label = $Label
 # 提示：你可以在 Product.gd 更新文字时，顺便把物品数据存到这里
-var linked_item_data: ItemData 
+var linked_item_data: ItemData
 func update_slot(data: ItemData):
 	linked_item_data = data
 	# 显示图片和名字
 	sprite.texture = data.icon
-	label.text = data.item_name +'数量：'+ str(data.amount)
+	label.text = data.item_name + '数量：' + str(data.amount)
 	# --- 鼠标移上去的提示 ---
 	# 确保 Panel 的 Mouse Filter 是 Stop
 	tooltip_text = "【%s】\n类型: %s\n描述: %s" % [data.item_name, data.type, data.description]
@@ -44,6 +44,6 @@ func _on_confirmed():
 	var product_node = get_tree().root.find_child("product", true, false)
 	
 	if product_node:
-		product_node.use_item(linked_item_data)
+		product_node.use_item(linked_item_data.item_name)
 	else:
 		print("Error: Could not find 'product' node in the scene tree")

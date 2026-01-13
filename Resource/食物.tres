@@ -8,6 +8,4 @@ resource_name = "食物"
 script = ExtResource("2_wqncf")
 item_name = "食物"
 icon = ExtResource("1_a4gd0")
-description = "这是食物，使用+30饥饿"
-amount = 1
-value = 30
+description = "这是食物，使用后身体能量储备+10。"

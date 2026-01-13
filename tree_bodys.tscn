@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://c25l0ri65tnrn"]
+
+[ext_resource type="Script" uid="uid://vkbntfumh46h" path="res://tree_body.gd" id="1_opcfw"]
+[ext_resource type="Texture2D" uid="uid://cqe2f6as14858" path="res://Outdoor decoration/Oak_Tree.png" id="2_msp7i"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d21ai"]
+size = Vector2(37, 52)
+
+[node name="treeBodys1" type="StaticBody2D" groups=["treeBodys"]]
+z_index = -1
+script = ExtResource("1_opcfw")
+metadata/description = "这是一棵树，砍到这棵树可以获得木材+10"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1.5, -3)
+shape = SubResource("RectangleShape2D_d21ai")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_msp7i")
+
+[node name="NavigationObstacle2D" type="NavigationObstacle2D" parent="."]
+vertices = PackedVector2Array(-28, -33, 31, -33, 27, 29, -26, 28)
