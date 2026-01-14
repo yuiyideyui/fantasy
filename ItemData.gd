@@ -2,7 +2,7 @@ extends Resource
 class_name ItemData # 这行非常重要，有了它你才能在新建资源时搜索到它
 
 @export var item_name: String = "" # 商品名称
-@export_enum("Food", "Water", "Seed") var type: String = "Food" # 商品类型
+@export_enum("Food", "Water", "Seed", "Wood") var type: String = "Food" # 商品类型
 @export var icon: Texture2D # 在背包里显示的图标
 @export var description: String = "" # 商品描述（比如：喝了能解渴）
 @export var amount: int = 1 #
@@ -14,5 +14,5 @@ func to_dict() -> Dictionary:
 		"name": item_name,
 		"amount": amount,
 		"type": type,
-		"description":description
+		"description": description
 	}

@@ -8,7 +8,9 @@ var sendData: Dictionary = {}
 
 # 动态引用的节点变量
 var player: CharacterBody2D = null
-var product: Node = null  
+var product: Node = null
+
+var actionText: Array = []
 
 # --- 生命周期方法 ---
 func _ready():
@@ -46,7 +48,8 @@ func send_data(data: Dictionary):
 	if socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
 		print("发送失败：未连接到服务器")
 		return
-		
+	# 将当前的 actionText 添加到数据中 action响应Text
+	data['responeText'] = actionText
 	var json_string = JSON.stringify(data)
 	socket.send_text(json_string)
 	print("--- 数据已通过 WebSocket 推送 ---")
@@ -59,7 +62,8 @@ func _on_data_received(payload: String):
 	if error == OK:
 		var data = json.data
 		print("收到 AI 决策: ", data.get("thought", ""))
-		
+		# 初始化文案
+		actionText = ''
 		var actions = data.get("actions", [])
 		
 		# 依次顺序执行动作
@@ -126,7 +130,7 @@ func move_fn(x: float, y: float) -> void:
 		print("玩家已到达目的地信号")
 	else:
 		print("错误：玩家 CharacterBody2D 缺少信号定义，启用 2秒兜底")
-		await get_tree().create_timer(2.0).timeout 
+		await get_tree().create_timer(2.0).timeout
 
 # 使用函数
 func use_fn(item_name: String):
@@ -140,6 +144,7 @@ func use_fn(item_name: String):
 func _trigger_export():
 	var root = get_tree().current_scene
 	if root and root.has_method("export_all_to_json"):
+		# 这里获取整个游戏世界的感知数据，最后回调 -> send_data
 		root.export_all_to_json(true)
 
 # 动态查找组件引用

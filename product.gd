@@ -3,7 +3,7 @@
 extends Node
 class_name product
 # 1. 这里预载你的面板场景
-var panel_scene = preload("res://panel.tscn") 
+var panel_scene = preload("res://panel.tscn")
 var panel_instance = null # 用来存储实例化后的面板
 @onready var status = $"../stats"
 # 加载你定义好的商品模板
@@ -19,11 +19,11 @@ func _input(event):
 		toggle_inventory()
 		
 # 1. 定义枚举（作为索引）
-enum ItemType { 纯净水, 食物 }
+enum ItemType {纯净水, 食物}
 # 2. 建立一个“翻译字典”，把枚举映射到你的文件名或中文名
 const ITEM_MAP = {
-	ItemType.纯净水: "纯净水", # 对应 Resource/Water.tres
-	ItemType.食物: "食物",  # 对应 Resource/Bread.tres
+	ItemType.纯净水:"纯净水", # 对应 Resource/Water.tres
+	ItemType.食物:"食物", # 对应 Resource/Bread.tres
 }
 # 现在直接传入字符串名字，例如 "Bread"
 func addProduct(type: ItemType):
@@ -86,7 +86,7 @@ func use_item(item_name: String):
 		# 使用 "in" 来检查 Resource 是否定义了 amount 属性
 		if "amount" in item_obj:
 			item_obj.amount -= 1
-			
+			NetworkManager.actionText.append('使用了' + item_obj.item_name)
 			# 4. 检查是否耗尽
 			if item_obj.amount <= 0:
 				inventory.remove_at(index)

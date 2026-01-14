@@ -30,7 +30,7 @@ func _ready():
 
 func _process(delta):
 	# 随着时间推移，饥饿和口渴会缓慢下降
-	nutrition -= 0.3 * delta  # 每秒掉 0.5
+	nutrition -= 0.3 * delta # 每秒掉 0.5
 	hydration -= 0.5 * delta
 	
 	# 逻辑联动示例：如果太饿或太渴，开始扣血
@@ -40,14 +40,13 @@ func _process(delta):
 	# 逻辑联动示例：如果在黑暗中或饥饿，掉理智
 	if nutrition < 20:
 		sanity -= 1.0 * delta
-func addStatus(item:ItemData):
+func addStatus(item: ItemData):
 	match item.type:
 		"Food":
-			print("吃了 ", item.item_name, "，恢复了 ", item.value, " 点体力")
+			NetworkManager.actionText.append('使用了' + item.item_name + "，恢复了 " + item.value + "能量")
 			nutrition += item.value
 		"Water":
-			print("喝了 ", item.item_name, "，口渴度下降")
+			NetworkManager.actionText.append('使用了' + item.item_name + "，恢复了 " + item.value + "含水量")
 			hydration += item.value
 		"Light":
 			print("点亮了 ", item.item_name, "，周围变亮了")
-			

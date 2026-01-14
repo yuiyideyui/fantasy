@@ -3,7 +3,7 @@ extends Node2D
 # --- 节点引用 ---
 @onready var map_root = $map
 @onready var objects_roots = [
-	$NavigationRegion2D/TreeSpawnZone, 
+	$NavigationRegion2D/TreeSpawnZone,
 	$NavigationRegion2D/fence
 ]
 @onready var player_status = $stats
@@ -13,7 +13,7 @@ func _ready():
 	export_all_to_json()
 
 ## 主导出函数
-func export_all_to_json(getOrSend=''):
+func export_all_to_json(getOrSend = false):
 	var export_data = {
 		"export_time": Time.get_datetime_string_from_system(),
 		"map_layers": {},
@@ -37,15 +37,15 @@ func export_all_to_json(getOrSend=''):
 		"nutrition": player_status.nutrition,
 		"health": player_status.health,
 		"hydration": player_status.health,
-		"sanity": player_status.sanity,  
-		"pos": { "grid_x": player.global_position.x, "grid_y": player.global_position.y },
-		"inventory":{
+		"sanity": player_status.sanity,
+		"pos": {"grid_x": player.global_position.x, "grid_y": player.global_position.y},
+		"inventory": {
 			"capacity": 20,
 			"used": 5,
 			"items": product.inventory.map(func(i): return i.to_dict())
 		}
 	}
-	if(getOrSend):
+	if (getOrSend):
 		NetworkManager.sendData = export_data
 		NetworkManager.send_data(export_data)
 		return
@@ -95,7 +95,7 @@ func _get_collision_size(entity: Node2D) -> Vector2:
 			var s = child.shape
 			if s is RectangleShape2D:
 				# RectangleShape2D 的 extents 是中心到边的距离，所以要乘以 2
-				return s.size 
+				return s.size
 			elif s is CircleShape2D:
 				# 圆形则返回直径
 				return Vector2(s.radius * 2, s.radius * 2)
@@ -108,7 +108,7 @@ func _get_collision_size(entity: Node2D) -> Vector2:
 func get_rect_compressed_map(layer: TileMapLayer) -> Dictionary:
 	var compressed_areas = []
 	var used_cells = layer.get_used_cells()
-	var visited = {} 
+	var visited = {}
 	used_cells.sort()
 
 	# --- 1. 获取图层全局描述 ---
@@ -134,7 +134,7 @@ func get_rect_compressed_map(layer: TileMapLayer) -> Dictionary:
 		# --- 2. 区域数据不再包含 description ---
 		var area = {
 			"x": rect.position.x,
-			"y": rect.position.y, 
+			"y": rect.position.y,
 			"w": rect.size.x,
 			"h": rect.size.y
 		}
@@ -204,7 +204,7 @@ func save_and_sync_ai(data: Dictionary):
 	# 2. 通过 WebSocket 实时推送
 	if NetworkManager.is_connected_to_server:
 		NetworkManager.send_data(data)
-	else:NetworkManager.sendData = data
+	else: NetworkManager.sendData = data
 		
 func save_json_file(data: Dictionary, file_name: String):
 	var file = FileAccess.open("user://" + file_name, FileAccess.WRITE)
